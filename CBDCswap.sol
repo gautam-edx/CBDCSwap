@@ -125,5 +125,30 @@ contract CBDCSwap is Ownable, Pausable {
     function withdraw() external onlyOwner {
         payable(owner()).transfer(address(this).balance);
     }
+
+     function searchOrderByToken(address _token) external view returns (uint256[] memory) {
+        uint256 count;
+        for (uint256 i = 0; i < orderCount; i++) {
+            if (orders[i].active && (orders[i].tokenGive == _token || orders[i].tokenGet == _token)) {
+                count++;
+            }
+        }
+
+        uint256[] memory result = new uint256[](count);
+        uint256 index;
+        for (uint256 i = 0; i < orderCount; i++) {
+            if (orders[i].active && (orders[i].tokenGive == _token || orders[i].tokenGet == _token)) {
+                result[index++] = i;
+            }
+        }
+
+        return result;
+    }
+
+    function getOrderDetails(uint256 _orderId) external view returns (address, address, uint256, address, uint256, bool) {
+        Order memory order = orders[_orderId];
+        require(order.active, "Order does not exist or inactive");
+        return (order.user, order.tokenGive, order.amountGive, order.tokenGet, order.amountGet, order.active);
+    }
 }
 
